@@ -8,6 +8,7 @@ const NAV = [
   { label: 'Groups',     href: '/superuser/groups',     icon: '⊞' },
   { label: 'Champions',  href: '/superuser/champions',  icon: '✦' },
   { label: 'Summaries',  href: '/superuser/summaries',  icon: '♪' },
+  { label: 'Activities', href: '/superuser/activities', icon: '◇' },
   { label: 'Analytics',  href: '/superuser/analytics',  icon: '∿' },
 ]
 
