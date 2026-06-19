@@ -457,7 +457,7 @@ export default function SummariesPage() {
 
           {/* Publish toggle + submit */}
           <div className="flex items-center gap-3">
-            <button type="button" onClick={() => setIsPublished(v => !v)} className={`relative w-9 h-5 rounded-full transition-colors ${isPublished ? 'bg-accent' : 'bg-surface-high border border-white/20'}`}>
+            <button type="button" onClick={() => setIsPublished(v => !v)} className={`relative w-9 h-5 shrink-0 rounded-full transition-colors ${isPublished ? 'bg-accent' : 'bg-surface-high border border-white/20'}`}>
               <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${isPublished ? 'translate-x-4' : 'translate-x-0.5'}`} />
             </button>
             <span className="text-sm text-muted">{isPublished ? 'Published (live in app)' : 'Draft (hidden)'}</span>

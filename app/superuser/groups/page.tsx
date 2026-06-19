@@ -162,7 +162,7 @@ export default function GroupsPage() {
             <button
               type="button"
               onClick={() => setIsPublic(v => !v)}
-              className={`relative w-9 h-5 rounded-full transition-colors ${isPublic ? 'bg-accent' : 'bg-surface-high border border-white/20'}`}
+              className={`relative w-9 h-5 shrink-0 rounded-full transition-colors ${isPublic ? 'bg-accent' : 'bg-surface-high border border-white/20'}`}
             >
               <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${isPublic ? 'translate-x-4' : 'translate-x-0.5'}`} />
             </button>
