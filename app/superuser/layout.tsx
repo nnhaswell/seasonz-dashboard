@@ -9,6 +9,7 @@ const NAV = [
   { label: 'Champions',  href: '/superuser/champions',  icon: '✦' },
   { label: 'Summaries',  href: '/superuser/summaries',  icon: '♪' },
   { label: 'Activities', href: '/superuser/activities', icon: '◇' },
+  { label: 'Waitlist',   href: '/superuser/waitlist',   icon: '✉' },
   { label: 'Analytics',  href: '/superuser/analytics',  icon: '∿' },
 ]
 
