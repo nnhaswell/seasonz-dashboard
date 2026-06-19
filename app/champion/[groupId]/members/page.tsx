@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { JoinRequestsPanel, RoleButton } from './member-actions'
 
 interface Props {
   params: Promise<{ groupId: string }>
@@ -35,6 +36,14 @@ export default async function MembersPage({ params }: Props) {
     `)
     .eq('group_id', groupId)
     .order('role', { ascending: false }) // champions first
+
+  // Pending join requests (Closed groups)
+  const { data: pendingRequests } = await supabase
+    .from('group_join_requests')
+    .select('id, user_id, created_at, profile:profiles(display_name, handle, avatar_url)')
+    .eq('group_id', groupId)
+    .eq('status', 'pending')
+    .order('created_at', { ascending: true })
 
   // Fetch activity stats in bulk to avoid N+1 queries
   const memberIds = (members ?? []).map((m: any) => m.user_id)
@@ -113,6 +122,9 @@ export default async function MembersPage({ params }: Props) {
         </p>
       </div>
 
+      {/* Pending join requests (Closed groups) */}
+      <JoinRequestsPanel groupId={groupId} requests={(pendingRequests ?? []) as any} />
+
       {/* Members Table */}
       <div className="card overflow-hidden">
         <table className="w-full">
@@ -135,6 +147,9 @@ export default async function MembersPage({ params }: Props) {
               </th>
               <th className="text-right px-4 py-3 text-xs font-semibold text-muted uppercase tracking-wider">
                 Engagement
+              </th>
+              <th className="text-right px-4 py-3 text-xs font-semibold text-muted uppercase tracking-wider">
+                Manage
               </th>
             </tr>
           </thead>
@@ -219,6 +234,11 @@ export default async function MembersPage({ params }: Props) {
                         <span className="text-xs text-faint">💤</span>
                       )}
                     </div>
+                  </td>
+
+                  {/* Manage (promote/demote) */}
+                  <td className="px-4 py-4 text-right">
+                    <RoleButton groupId={groupId} userId={member.user_id} role={member.role} />
                   </td>
                 </tr>
               )
