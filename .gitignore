@@ -32,3 +32,6 @@ yarn-error.log*
 
 # editor
 .idea
+
+# superpowers brainstorm mockups (local only)
+.superpowers/
