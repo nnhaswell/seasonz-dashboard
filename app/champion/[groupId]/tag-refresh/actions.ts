@@ -130,3 +130,101 @@ export async function pushRound(input: PushRoundInput): Promise<{ roundId: strin
 
   return { roundId: round.id };
 }
+
+export interface BankSummary {
+  id: string;
+  name: string;
+  theme: string | null;
+  source: 'manual' | 'ai';
+  wordCount: number;
+  createdAt: string;
+}
+
+/** Save a reusable bank (no round). Returns the bank id. */
+export async function saveBank(input: {
+  groupId: string;
+  name: string;
+  theme: string | null;
+  source: 'manual' | 'ai';
+  words: GeneratedWord[];
+}): Promise<{ bankId: string }> {
+  if (!input.words.length) throw new Error('Add at least one word.');
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Not authenticated.');
+
+  const { data: bank, error: bankErr } = await supabase
+    .from('tag_refresh_banks')
+    .insert({
+      group_id: input.groupId,
+      created_by: user.id,
+      name: input.name.trim() || 'Untitled bank',
+      theme: input.theme,
+      source: input.source,
+    })
+    .select('id')
+    .single();
+  if (bankErr || !bank) throw new Error(bankErr?.message ?? 'Could not save the bank.');
+
+  const { error: wordsErr } = await supabase.from('tag_refresh_bank_words').insert(
+    input.words.map((w, i) => ({
+      bank_id: bank.id,
+      label: w.label.trim(),
+      emoji: w.emoji,
+      display_mode: w.displayMode,
+      position: i,
+    })),
+  );
+  if (wordsErr) throw new Error(wordsErr.message);
+
+  return { bankId: bank.id };
+}
+
+/** List the group's saved banks (most recent first) with word counts. */
+export async function listBanks(groupId: string): Promise<BankSummary[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('tag_refresh_banks')
+    .select('id, name, theme, source, created_at, tag_refresh_bank_words(count)')
+    .eq('group_id', groupId)
+    .order('created_at', { ascending: false });
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((b: any) => ({
+    id: b.id,
+    name: b.name,
+    theme: b.theme,
+    source: b.source,
+    wordCount: b.tag_refresh_bank_words?.[0]?.count ?? 0,
+    createdAt: b.created_at,
+  }));
+}
+
+/** Load a bank's words (to preload the Build screen). */
+export async function getBankWords(bankId: string): Promise<GeneratedWord[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('tag_refresh_bank_words')
+    .select('label, emoji, display_mode, position')
+    .eq('bank_id', bankId)
+    .order('position', { ascending: true });
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((w: any) => ({
+    label: w.label,
+    emoji: w.emoji ?? null,
+    displayMode: w.display_mode,
+  }));
+}
+
+/** Delete a bank — refused if any round has been pushed from it (would cascade). */
+export async function deleteBank(bankId: string): Promise<void> {
+  const supabase = await createClient();
+  const { count } = await supabase
+    .from('tag_refresh_rounds')
+    .select('id', { count: 'exact', head: true })
+    .eq('bank_id', bankId);
+  if ((count ?? 0) > 0) {
+    throw new Error('This bank has been pushed in a round and can’t be deleted.');
+  }
+  const { error } = await supabase.from('tag_refresh_banks').delete().eq('id', bankId);
+  if (error) throw new Error(error.message);
+}
