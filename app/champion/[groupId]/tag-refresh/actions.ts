@@ -2,6 +2,7 @@
 'use server';
 
 import { anthropic } from '@/lib/anthropic';
+import { createClient } from '@/lib/supabase/server';
 
 export type DisplayMode = 'text' | 'combo' | 'emoji';
 export interface GeneratedWord {
@@ -67,4 +68,65 @@ export async function generateWordBank(theme: string, count: number): Promise<Ge
       emoji: w.emoji ?? null,
       displayMode: (['text', 'combo', 'emoji'] as const).includes(w.displayMode) ? w.displayMode : 'combo',
     }));
+}
+
+export interface PushRoundInput {
+  groupId: string;
+  name: string;
+  theme: string | null;
+  source: 'manual' | 'ai';
+  words: GeneratedWord[];
+  speed: 'slow' | 'medium' | 'fast';
+  wordsPerRound: number;
+}
+
+/** Create a bank + words + a 'sent' round for the group. Returns the round id. */
+export async function pushRound(input: PushRoundInput): Promise<{ roundId: string }> {
+  if (!input.words.length) throw new Error('Add at least one word.');
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Not authenticated.');
+
+  const { data: bank, error: bankErr } = await supabase
+    .from('tag_refresh_banks')
+    .insert({
+      group_id: input.groupId,
+      created_by: user.id,
+      name: input.name.trim() || 'Untitled bank',
+      theme: input.theme,
+      source: input.source,
+    })
+    .select('id')
+    .single();
+  if (bankErr || !bank) throw new Error(bankErr?.message ?? 'Could not create the bank.');
+
+  const { error: wordsErr } = await supabase.from('tag_refresh_bank_words').insert(
+    input.words.map((w, i) => ({
+      bank_id: bank.id,
+      label: w.label.trim(),
+      emoji: w.emoji,
+      display_mode: w.displayMode,
+      position: i,
+    })),
+  );
+  if (wordsErr) throw new Error(wordsErr.message);
+
+  const { data: round, error: roundErr } = await supabase
+    .from('tag_refresh_rounds')
+    .insert({
+      bank_id: bank.id,
+      group_id: input.groupId,
+      created_by: user.id,
+      speed: input.speed,
+      words_per_round: input.wordsPerRound,
+      audience: 'all',
+      status: 'sent',
+      sent_at: new Date().toISOString(),
+    })
+    .select('id')
+    .single();
+  if (roundErr || !round) throw new Error(roundErr?.message ?? 'Could not create the round.');
+
+  return { roundId: round.id };
 }
