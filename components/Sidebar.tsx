@@ -23,7 +23,8 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Members',    href: 'members',    icon: '⊹' },
   { label: 'Messaging',  href: 'messaging',  icon: '✉' },
   { label: 'AI Assist',  href: 'ai-assist',  icon: '✦' },
-  { label: 'Activities', href: 'activities', icon: '◇' },
+  { label: 'Activities',  href: 'activities',  icon: '◇' },
+  { label: 'Tag Refresh', href: 'tag-refresh', icon: '✺' },
   { label: 'Content',    href: 'content',    icon: '⊞' },
 ]
 
