@@ -62,12 +62,7 @@ export default function TagRefreshPage({ params }: { params: Promise<{ groupId: 
   }
 
   return (
-    <div className="max-w-4xl">
-      <h1 className="text-2xl font-bold text-white">Tag Refresh</h1>
-      <p className="text-sm text-muted mt-1 mb-6">
-        Build a word bank and push a quick falling-words game to your members to refresh their tags.
-      </p>
-
+    <div>
       <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-4">
         {/* Word bank */}
         <div className="card">
