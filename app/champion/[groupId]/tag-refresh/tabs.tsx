@@ -9,6 +9,7 @@ export function TagRefreshTabs({ groupId }: { groupId: string }) {
   const base = `/champion/${groupId}/tag-refresh`;
   const tabs = [
     { label: 'Build', href: base },
+    { label: 'Library', href: `${base}/library` },
     { label: 'Insights', href: `${base}/insights` },
   ];
   return (

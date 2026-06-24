@@ -2,7 +2,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { generateWordBank, pushRound, type GeneratedWord } from './actions';
+import { generateWordBank, pushRound, saveBank, getBankWords, type GeneratedWord } from './actions';
+import { useSearchParams } from 'next/navigation';
 
 export default function TagRefreshPage({ params }: { params: Promise<{ groupId: string }> }) {
   const [groupId, setGroupId] = useState('');
@@ -17,6 +18,33 @@ export default function TagRefreshPage({ params }: { params: Promise<{ groupId: 
   const [pushing, setPushing] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
   const [usedAi, setUsedAi] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const searchParams = useSearchParams();
+  const bankParam = searchParams.get('bank');
+
+  useEffect(() => {
+    if (!bankParam) return;
+    getBankWords(bankParam)
+      .then((w) => { setWords(w); setUsedAi(false); })
+      .catch(() => {});
+  }, [bankParam]);
+
+  async function onSaveToLibrary() {
+    if (!words.length) { setStatus('Add at least one word first.'); return; }
+    setSaving(true); setStatus(null);
+    try {
+      await saveBank({
+        groupId,
+        name: theme.trim() || 'Tag Refresh bank',
+        theme: theme.trim() || null,
+        source: usedAi ? 'ai' : 'manual',
+        words,
+      });
+      setStatus('Saved to Library.');
+    } catch (e) {
+      setStatus(`Save failed: ${(e as Error).message}`);
+    } finally { setSaving(false); }
+  }
 
   async function onGenerate() {
     if (!theme.trim()) return;
@@ -132,6 +160,13 @@ export default function TagRefreshPage({ params }: { params: Promise<{ groupId: 
             </div>
           </div>
 
+          <button
+            onClick={onSaveToLibrary}
+            disabled={saving || !words.length}
+            className="w-full bg-surface-high text-white font-bold text-sm py-2.5 rounded-xl mt-4 disabled:opacity-50"
+          >
+            {saving ? 'Saving…' : 'Save to Library'}
+          </button>
           <button
             onClick={onPush}
             disabled={pushing || !words.length || !groupId}
