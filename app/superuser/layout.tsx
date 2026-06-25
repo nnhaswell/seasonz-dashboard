@@ -11,6 +11,7 @@ const NAV = [
   { label: 'Activities', href: '/superuser/activities', icon: '◇' },
   { label: 'Waitlist',   href: '/superuser/waitlist',   icon: '✉' },
   { label: 'Analytics',  href: '/superuser/analytics',  icon: '∿' },
+  { label: 'Tag Refresh', href: '/superuser/tag-refresh', icon: '✺' },
 ]
 
 export default async function SuperuserLayout({ children }: { children: React.ReactNode }) {
