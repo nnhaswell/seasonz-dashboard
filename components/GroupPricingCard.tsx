@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { setGroupPricing } from '@/app/champion/[groupId]/group-pricing-actions';
 import { formatPrice, type PricingType, type BillingInterval } from '@/lib/price';
 
-const CURRENCIES = ['GBP', 'USD', 'EUR', 'AUD', 'CAD'];
+const CURRENCIES = ['GBP', 'USD', 'EUR', 'AUD', 'CAD', 'AED'];
 
 export interface GroupPricingCardProps {
   groupId: string;
