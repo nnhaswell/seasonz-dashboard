@@ -58,6 +58,7 @@ export function GroupCard({ group, users, onChanged }: Props) {
   const [championPick, setChampionPick] = useState('')
   const [championFilter, setChampionFilter] = useState('')
   const [assigning, setAssigning] = useState(false)
+  const [removingChamp, setRemovingChamp] = useState(false)
   const [championMsg, setChampionMsg] = useState<string | null>(null)
 
   async function saveEdit() {
@@ -72,9 +73,21 @@ export function GroupCard({ group, users, onChanged }: Props) {
     onChanged()
   }
 
+  /** Demote any current champion(s) of this group to plain member. */
+  async function demoteChampions() {
+    return supabase
+      .from('group_members')
+      .update({ role: 'member' })
+      .eq('group_id', group.id)
+      .eq('role', 'champion')
+  }
+
   async function assignChampion() {
     if (!championPick) { setChampionMsg('Pick a user first.'); return }
     setAssigning(true); setChampionMsg(null)
+    // Replace: demote existing champion(s), then set the picked user.
+    const { error: demoteErr } = await demoteChampions()
+    if (demoteErr) { setAssigning(false); setChampionMsg(`Failed: ${demoteErr.message}`); return }
     const { error } = await supabase
       .from('group_members')
       .upsert(
@@ -83,8 +96,18 @@ export function GroupCard({ group, users, onChanged }: Props) {
       )
     setAssigning(false)
     if (error) { setChampionMsg(`Failed: ${error.message}`); return }
-    setChampionMsg('Champion assigned.')
+    setChampionMsg(group.championName ? 'Champion replaced.' : 'Champion assigned.')
     setChampionPick('')
+    onChanged()
+  }
+
+  async function removeChampion() {
+    if (!confirm('Remove the current champion? They stay a member of the group.')) return
+    setRemovingChamp(true); setChampionMsg(null)
+    const { error } = await demoteChampions()
+    setRemovingChamp(false)
+    if (error) { setChampionMsg(`Failed: ${error.message}`); return }
+    setChampionMsg('Champion removed.')
     onChanged()
   }
 
@@ -196,9 +219,19 @@ export function GroupCard({ group, users, onChanged }: Props) {
           {/* Champion */}
           <div>
             <p className="text-xs font-bold tracking-widest uppercase text-muted mb-3">Champion</p>
-            <p className="text-xs text-faint mb-2">
-              {group.championName ? <>Current: <span className="text-accent">{group.championName}</span></> : 'No champion assigned'}
-            </p>
+            <div className="flex items-center gap-3 mb-2">
+              <p className="text-xs text-faint">
+                {group.championName ? <>Current: <span className="text-accent">{group.championName}</span></> : 'No champion assigned'}
+              </p>
+              {group.championName && (
+                <button
+                  onClick={removeChampion} disabled={removingChamp}
+                  className="text-xs text-faint hover:text-past transition-colors disabled:opacity-50"
+                >
+                  {removingChamp ? 'Removing…' : 'Remove'}
+                </button>
+              )}
+            </div>
             <div className="flex flex-wrap items-center gap-2">
               <input
                 value={championFilter} onChange={e => setChampionFilter(e.target.value)}
@@ -218,7 +251,7 @@ export function GroupCard({ group, users, onChanged }: Props) {
                 onClick={assignChampion} disabled={assigning || !championPick}
                 className="bg-surface-high text-white font-bold text-sm px-4 py-2.5 rounded-xl border border-white/[0.08] hover:border-accent/60 disabled:opacity-50"
               >
-                {assigning ? 'Assigning…' : 'Assign as champion'}
+                {assigning ? 'Saving…' : group.championName ? 'Replace champion' : 'Assign as champion'}
               </button>
               {championMsg && <span className="text-xs text-muted">{championMsg}</span>}
             </div>
