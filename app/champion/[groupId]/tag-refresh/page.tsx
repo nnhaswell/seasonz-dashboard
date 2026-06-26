@@ -4,6 +4,8 @@
 import { useEffect, useState } from 'react';
 import { generateWordBank, pushRound, saveBank, getBankWords, type GeneratedWord } from './actions';
 import { useSearchParams } from 'next/navigation';
+import { TagRefreshPresetPicker } from '@/components/TagRefreshPresetPicker';
+import type { PresetPack } from '@/lib/tagRefreshPresets';
 
 export default function TagRefreshPage({ params }: { params: Promise<{ groupId: string }> }) {
   const [groupId, setGroupId] = useState('');
@@ -69,6 +71,13 @@ export default function TagRefreshPage({ params }: { params: Promise<{ groupId: 
     setWords((prev) => prev.filter((w) => w.label !== label));
   }
 
+  function loadPreset(pack: PresetPack) {
+    setTheme(pack.theme);
+    setWords(dedupe(pack.words));
+    setUsedAi(false);
+    setStatus(`Loaded “${pack.theme}” — edit the chips below, then push or save.`);
+  }
+
   async function onPush() {
     if (!words.length) { setStatus('Add at least one word first.'); return; }
     setPushing(true); setStatus(null);
@@ -91,6 +100,8 @@ export default function TagRefreshPage({ params }: { params: Promise<{ groupId: 
 
   return (
     <div>
+      <TagRefreshPresetPicker onLoad={loadPreset} />
+
       <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-4">
         {/* Word bank */}
         <div className="card">

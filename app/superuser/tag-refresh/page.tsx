@@ -4,6 +4,8 @@
 import { useState } from 'react';
 import { generateWordBank, type GeneratedWord } from '@/app/champion/[groupId]/tag-refresh/actions';
 import { pushOrgRound } from './actions';
+import { TagRefreshPresetPicker } from '@/components/TagRefreshPresetPicker';
+import type { PresetPack } from '@/lib/tagRefreshPresets';
 
 export default function SuperuserTagRefreshPage() {
   const [theme, setTheme] = useState('');
@@ -39,6 +41,13 @@ export default function SuperuserTagRefreshPage() {
     setWords((prev) => prev.filter((w) => w.label !== label));
   }
 
+  function loadPreset(pack: PresetPack) {
+    setTheme(pack.theme);
+    setWords(dedupe(pack.words));
+    setUsedAi(false);
+    setStatus(`Loaded “${pack.theme}” — edit the chips below, then push.`);
+  }
+
   async function onPush() {
     if (!words.length) { setStatus('Add at least one word first.'); return; }
     setPushing(true); setStatus(null);
@@ -64,6 +73,8 @@ export default function SuperuserTagRefreshPage() {
       <p className="text-sm text-muted mt-1 mb-6">
         Build a word bank and push a falling-words game to <b>every</b> Seasons member.
       </p>
+
+      <TagRefreshPresetPicker onLoad={loadPreset} />
 
       <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-4">
         <div className="card">
