@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { GroupPricingCard } from '@/components/GroupPricingCard'
 
 const SEASON_COLOR: Record<string, string> = {
   past:    '#f87559',
@@ -11,14 +12,18 @@ const SEASON_COLOR: Record<string, string> = {
 }
 
 type Group = {
-  id:           string
-  name:         string
-  description:  string | null
-  season:       string | null
-  is_public:    boolean
-  member_count: number
-  created_at:   string
-  champion:     string | null
+  id:              string
+  name:            string
+  description:     string | null
+  season:          string | null
+  is_public:       boolean
+  member_count:    number
+  created_at:      string
+  champion:        string | null
+  pricing_type:    'free' | 'one_time' | 'subscription'
+  price_amount:    number
+  price_currency:  string
+  billing_interval: 'month' | 'year' | null
 }
 
 export default function GroupsPage() {
@@ -44,6 +49,7 @@ export default function GroupsPage() {
       .from('groups')
       .select(`
         id, name, description, season, is_public, member_count, created_at,
+        pricing_type, price_amount, price_currency, billing_interval,
         group_members!left(user_id, role, profiles(display_name))
       `)
       .order('created_at', { ascending: false })
@@ -60,7 +66,11 @@ export default function GroupsPage() {
         is_public:    g.is_public,
         member_count: g.member_count,
         created_at:   g.created_at,
-        champion:     champion?.profiles?.display_name ?? null,
+        champion:        champion?.profiles?.display_name ?? null,
+        pricing_type:    g.pricing_type,
+        price_amount:    g.price_amount,
+        price_currency:  g.price_currency,
+        billing_interval: g.billing_interval,
       }
     })
 
@@ -196,42 +206,51 @@ export default function GroupsPage() {
       ) : (
         <div className="flex flex-col gap-3">
           {groups.map(g => (
-            <div key={g.id} className="card flex items-start justify-between gap-4">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className="text-sm font-semibold text-white capitalize truncate">{g.name}</h3>
-                  {g.season && (
-                    <span
-                      className="text-xs px-2 py-0.5 rounded-full shrink-0"
-                      style={{
-                        backgroundColor: (SEASON_COLOR[g.season] ?? '#9aa3b8') + '22',
-                        color: SEASON_COLOR[g.season] ?? '#9aa3b8',
-                      }}
-                    >
-                      {g.season}
-                    </span>
+            <div key={g.id} className="flex flex-col gap-3">
+              <div className="card flex items-start justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="text-sm font-semibold text-white capitalize truncate">{g.name}</h3>
+                    {g.season && (
+                      <span
+                        className="text-xs px-2 py-0.5 rounded-full shrink-0"
+                        style={{
+                          backgroundColor: (SEASON_COLOR[g.season] ?? '#9aa3b8') + '22',
+                          color: SEASON_COLOR[g.season] ?? '#9aa3b8',
+                        }}
+                      >
+                        {g.season}
+                      </span>
+                    )}
+                    {!g.is_public && (
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-white/[0.06] text-faint shrink-0">private</span>
+                    )}
+                  </div>
+                  {g.description && (
+                    <p className="text-xs text-muted line-clamp-1 mb-2">{g.description}</p>
                   )}
-                  {!g.is_public && (
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-white/[0.06] text-faint shrink-0">private</span>
-                  )}
+                  <div className="flex items-center gap-4 text-xs text-faint">
+                    <span>{g.member_count} member{g.member_count !== 1 ? 's' : ''}</span>
+                    {g.champion
+                      ? <span className="text-accent">Champion: {g.champion}</span>
+                      : <span className="text-past">No champion assigned</span>
+                    }
+                  </div>
                 </div>
-                {g.description && (
-                  <p className="text-xs text-muted line-clamp-1 mb-2">{g.description}</p>
-                )}
-                <div className="flex items-center gap-4 text-xs text-faint">
-                  <span>{g.member_count} member{g.member_count !== 1 ? 's' : ''}</span>
-                  {g.champion
-                    ? <span className="text-accent">Champion: {g.champion}</span>
-                    : <span className="text-past">No champion assigned</span>
-                  }
-                </div>
+                <button
+                  onClick={() => handleDelete(g.id, g.name)}
+                  className="shrink-0 text-xs text-faint hover:text-past transition-colors px-2 py-1"
+                >
+                  Delete
+                </button>
               </div>
-              <button
-                onClick={() => handleDelete(g.id, g.name)}
-                className="shrink-0 text-xs text-faint hover:text-past transition-colors px-2 py-1"
-              >
-                Delete
-              </button>
+              <GroupPricingCard
+                groupId={g.id}
+                initialType={g.pricing_type}
+                initialAmount={g.price_amount}
+                initialCurrency={g.price_currency}
+                initialInterval={g.billing_interval}
+              />
             </div>
           ))}
         </div>
