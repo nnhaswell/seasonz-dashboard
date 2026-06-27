@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { Toggle } from '@/components/Toggle'
 
 const CTA_OPTIONS = ['check in', 'write it', 'start reflection'] as const
 
@@ -159,12 +160,7 @@ export default function ChampionActivitiesPage() {
             <label className="block text-xs text-muted mb-1.5">Expires (optional)</label>
             <input type="date" value={expires} onChange={e => setExpires(e.target.value)} className={inputCls} />
           </div>
-          <div className="flex items-center gap-3">
-            <button type="button" onClick={() => setIsPublished(v => !v)} className={`relative w-9 h-5 shrink-0 rounded-full transition-colors ${isPublished ? 'bg-accent' : 'bg-surface-high border border-white/20'}`}>
-              <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${isPublished ? 'translate-x-4' : 'translate-x-0.5'}`} />
-            </button>
-            <span className="text-sm text-muted">{isPublished ? 'Published (live)' : 'Draft (hidden)'}</span>
-          </div>
+          <Toggle checked={isPublished} onChange={setIsPublished} label={isPublished ? 'Published (live)' : 'Draft (hidden)'} />
           {formError && <p className="text-sm text-past">{formError}</p>}
           <button type="submit" disabled={saving} className="self-start bg-accent text-accent-ink font-semibold text-sm rounded-lg px-4 py-2.5 hover:opacity-90 disabled:opacity-40 transition-opacity">
             {saving ? 'Creating…' : 'Create activity'}

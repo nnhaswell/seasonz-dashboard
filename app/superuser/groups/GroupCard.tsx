@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { GroupPricingCard } from '@/components/GroupPricingCard'
+import { Toggle } from '@/components/Toggle'
 import { formatPrice } from '@/lib/price'
 
 const SEASON_COLOR: Record<string, string> = {
@@ -196,14 +197,8 @@ export function GroupCard({ group, users, onChanged }: Props) {
                 className="w-full bg-surface-high border border-white/[0.08] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-accent resize-none"
               />
             </div>
-            <div className="flex items-center gap-3 mb-3">
-              <button
-                type="button" onClick={() => setIsPublic(v => !v)}
-                className={`relative w-9 h-5 shrink-0 rounded-full transition-colors ${isPublic ? 'bg-accent' : 'bg-surface-high border border-white/20'}`}
-              >
-                <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${isPublic ? 'translate-x-4' : 'translate-x-0.5'}`} />
-              </button>
-              <span className="text-sm text-muted">{isPublic ? 'Public' : 'Private'}</span>
+            <div className="mb-3">
+              <Toggle checked={isPublic} onChange={setIsPublic} label={isPublic ? 'Public' : 'Private'} />
             </div>
             <div className="flex items-center gap-3">
               <button

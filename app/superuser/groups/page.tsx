@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { GroupCard, type GroupCardData, type UserOption } from './GroupCard'
+import { Toggle } from '@/components/Toggle'
 
 export default function GroupsPage() {
   const supabase = createClient()
@@ -161,16 +162,7 @@ export default function GroupsPage() {
             />
           </div>
 
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => setIsPublic(v => !v)}
-              className={`relative w-9 h-5 shrink-0 rounded-full transition-colors ${isPublic ? 'bg-accent' : 'bg-surface-high border border-white/20'}`}
-            >
-              <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${isPublic ? 'translate-x-4' : 'translate-x-0.5'}`} />
-            </button>
-            <span className="text-sm text-muted">{isPublic ? 'Public' : 'Private'}</span>
-          </div>
+          <Toggle checked={isPublic} onChange={setIsPublic} label={isPublic ? 'Public' : 'Private'} />
 
           {createError && <p className="text-sm text-past">{createError}</p>}
 
