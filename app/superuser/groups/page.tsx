@@ -31,6 +31,7 @@ export default function GroupsPage() {
         .select(`
           id, name, description, season, is_public, member_count, created_at,
           pricing_type, price_amount, price_currency, billing_interval,
+          group_tags(label),
           group_members!left(user_id, role, profiles(display_name))
         `)
         .order('created_at', { ascending: false }),
@@ -50,6 +51,7 @@ export default function GroupsPage() {
         member_count:     g.member_count,
         championName:     champion?.profiles?.display_name ?? null,
         championId:       champion?.user_id ?? null,
+        tags:             (g.group_tags ?? []).map((t: any) => t.label),
         pricing_type:     g.pricing_type,
         price_amount:     g.price_amount,
         price_currency:   g.price_currency,
