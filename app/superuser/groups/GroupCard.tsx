@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { GroupPricingCard } from '@/components/GroupPricingCard'
 import { Toggle } from '@/components/Toggle'
@@ -70,6 +70,9 @@ export function GroupCard({ group, users, onChanged }: Props) {
   const [tags, setTags] = useState<string[]>(group.tags ?? [])
   const [savingTags, setSavingTags] = useState(false)
   const [tagsMsg, setTagsMsg] = useState<string | null>(null)
+
+  // Keep local tag state in sync if the group is re-fetched (e.g. after a save).
+  useEffect(() => { setTags(group.tags ?? []) }, [group.tags])
 
   function toggleTag(label: string) {
     setTags((prev) =>
@@ -294,6 +297,7 @@ export function GroupCard({ group, users, onChanged }: Props) {
           <div>
             <p className="text-xs font-bold tracking-widest uppercase text-muted mb-3">
               Tags <span className="text-faint font-normal">· {tags.length}/{MAX_TAGS}</span>
+              {tags.length >= MAX_TAGS && <span className="text-faint font-normal normal-case tracking-normal ml-2">max reached</span>}
             </p>
 
             {tags.length > 0 && (
@@ -322,11 +326,13 @@ export function GroupCard({ group, users, onChanged }: Props) {
                   <div className="flex flex-wrap gap-1.5">
                     {pack.words.map((w) => {
                       const on = tags.includes(w.label)
+                      const capped = !on && tags.length >= MAX_TAGS
                       return (
                         <button
                           key={w.label}
                           onClick={() => toggleTag(w.label)}
-                          className={`text-xs font-semibold px-2.5 py-1 rounded-lg border ${on ? 'bg-accent text-accent-ink border-accent' : 'bg-surface-low text-muted border-white/10 hover:border-accent/50'}`}
+                          disabled={capped}
+                          className={`text-xs font-semibold px-2.5 py-1 rounded-lg border ${on ? 'bg-accent text-accent-ink border-accent' : capped ? 'bg-surface-low text-faint border-white/5 opacity-40 cursor-not-allowed' : 'bg-surface-low text-muted border-white/10 hover:border-accent/50'}`}
                         >
                           {w.emoji ? `${w.emoji} ` : ''}{w.label}
                         </button>

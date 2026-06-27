@@ -8,7 +8,7 @@ create table if not exists public.group_tags (
   primary key (group_id, label)
 );
 create index if not exists idx_group_tags_label on public.group_tags(label);
-create index if not exists idx_group_tags_group on public.group_tags(group_id);
+-- (group_id lookups are served by the composite primary key's leading column.)
 
 alter table public.group_tags enable row level security;
 
