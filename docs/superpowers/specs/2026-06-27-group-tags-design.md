@@ -137,7 +137,7 @@ Ranking is by **overlap count** for v1 (number of shared labels). Weighting by u
 ## Migration & rollout
 
 - One migration (`group_tags` + `set_group_tags`), applied live from `Seasons_AIv02` (Tokyo); copy to the dashboard repo for record (same pattern as paid groups).
-- **Cold start:** existing groups have no tags until a champion/superuser sets them. Optional one-off: seed the 5 case-study seed groups with a few sensible tags so Discover has something to rank on day one (can be a manual SQL seed in the migration).
+- **Cold start:** no seeding. Existing groups start with no tags until a champion/superuser sets them (the user is clearing all data shortly, so a seed would be throwaway). New users with no tags fall back to member-count ordering, so the empty state is safe.
 
 ## Out of scope (future)
 
