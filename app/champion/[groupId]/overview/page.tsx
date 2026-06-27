@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { formatDistanceToNow } from 'date-fns'
+import { GroupPricingCard } from '@/components/GroupPricingCard'
 
 interface Props {
   params: Promise<{ groupId: string }>
@@ -31,7 +32,7 @@ export default async function OverviewPage({ params }: Props) {
     // Group details — only columns that exist in the schema
     supabase
       .from('groups')
-      .select('name, description, season, member_count')
+      .select('name, description, season, member_count, pricing_type, price_amount, price_currency, billing_interval')
       .eq('id', groupId)
       .single(),
 
@@ -42,7 +43,11 @@ export default async function OverviewPage({ params }: Props) {
       .eq('group_id', groupId),
   ])
 
-  const group   = groupRes.data as { name: string; description: string | null; season: string | null; member_count: number } | null
+  const group = groupRes.data as {
+    name: string; description: string | null; season: string | null; member_count: number;
+    pricing_type: 'free' | 'one_time' | 'subscription'; price_amount: number;
+    price_currency: string; billing_interval: 'month' | 'year' | null;
+  } | null
   const members = membersRes.data ?? []
 
   // ── Fetch posts using member IDs ──────────────────────────────────────────
@@ -91,6 +96,16 @@ export default async function OverviewPage({ params }: Props) {
         {group.description && (
           <p className="text-muted text-sm mt-1.5 max-w-lg">{group.description}</p>
         )}
+      </div>
+
+      <div className="mb-6">
+        <GroupPricingCard
+          groupId={groupId}
+          initialType={group.pricing_type}
+          initialAmount={group.price_amount}
+          initialCurrency={group.price_currency}
+          initialInterval={group.billing_interval}
+        />
       </div>
 
       {/* ── Stats row ─────────────────────────────────────────────────────── */}

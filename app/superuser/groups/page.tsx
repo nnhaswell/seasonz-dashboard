@@ -1,32 +1,18 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-
-const SEASON_COLOR: Record<string, string> = {
-  past:    '#f87559',
-  present: '#22c55e',
-  future:  '#60a5fa',
-  multi:   '#9aa3b8',
-}
-
-type Group = {
-  id:           string
-  name:         string
-  description:  string | null
-  season:       string | null
-  is_public:    boolean
-  member_count: number
-  created_at:   string
-  champion:     string | null
-}
+import { GroupCard, type GroupCardData, type UserOption } from './GroupCard'
+import { Toggle } from '@/components/Toggle'
 
 export default function GroupsPage() {
   const supabase = createClient()
 
-  const [groups,  setGroups]  = useState<Group[]>([])
+  const [groups,  setGroups]  = useState<GroupCardData[]>([])
+  const [users,   setUsers]   = useState<UserOption[]>([])
   const [loading, setLoading] = useState(true)
   const [error,   setError]   = useState('')
+  const [query,   setQuery]   = useState('')
 
   // Create form state
   const [showForm,     setShowForm]     = useState(false)
@@ -39,36 +25,52 @@ export default function GroupsPage() {
 
   async function load() {
     setLoading(true)
-    // Fetch groups with champion info
-    const { data, error } = await supabase
-      .from('groups')
-      .select(`
-        id, name, description, season, is_public, member_count, created_at,
-        group_members!left(user_id, role, profiles(display_name))
-      `)
-      .order('created_at', { ascending: false })
+    const [groupsRes, usersRes] = await Promise.all([
+      supabase
+        .from('groups')
+        .select(`
+          id, name, description, season, is_public, member_count, created_at,
+          pricing_type, price_amount, price_currency, billing_interval,
+          group_members!left(user_id, role, profiles(display_name))
+        `)
+        .order('created_at', { ascending: false }),
+      supabase.from('profiles').select('id, display_name').order('display_name', { ascending: true }),
+    ])
 
-    if (error) { setError(error.message); setLoading(false); return }
+    if (groupsRes.error) { setError(groupsRes.error.message); setLoading(false); return }
 
-    const mapped: Group[] = (data ?? []).map((g: any) => {
+    const mapped: GroupCardData[] = (groupsRes.data ?? []).map((g: any) => {
       const champion = g.group_members?.find((m: any) => m.role === 'champion')
       return {
-        id:           g.id,
-        name:         g.name,
-        description:  g.description,
-        season:       g.season,
-        is_public:    g.is_public,
-        member_count: g.member_count,
-        created_at:   g.created_at,
-        champion:     champion?.profiles?.display_name ?? null,
+        id:               g.id,
+        name:             g.name,
+        description:      g.description,
+        season:           g.season,
+        is_public:        g.is_public,
+        member_count:     g.member_count,
+        championName:     champion?.profiles?.display_name ?? null,
+        championId:       champion?.user_id ?? null,
+        pricing_type:     g.pricing_type,
+        price_amount:     g.price_amount,
+        price_currency:   g.price_currency,
+        billing_interval: g.billing_interval,
       }
     })
 
     setGroups(mapped)
+    setUsers((usersRes.data ?? []) as UserOption[])
     setLoading(false)
   }
 
   useEffect(() => { load() }, [])
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    if (!q) return groups
+    return groups.filter(g =>
+      g.name.toLowerCase().includes(q) || (g.description ?? '').toLowerCase().includes(q),
+    )
+  }, [groups, query])
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault()
@@ -94,16 +96,10 @@ export default function GroupsPage() {
     load()
   }
 
-  async function handleDelete(id: string, groupName: string) {
-    if (!confirm(`Delete "${groupName}"? This cannot be undone.`)) return
-    await supabase.from('groups').delete().eq('id', id)
-    load()
-  }
-
   return (
     <div className="max-w-4xl">
 
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-white">Groups</h1>
           <p className="text-muted text-sm mt-1">{groups.length} groups on the platform</p>
@@ -115,6 +111,14 @@ export default function GroupsPage() {
           {showForm ? 'Cancel' : '✦ New group'}
         </button>
       </div>
+
+      {/* Search */}
+      <input
+        value={query}
+        onChange={e => setQuery(e.target.value)}
+        placeholder="Search groups…"
+        className="w-full bg-surface-high border border-white/[0.08] rounded-lg px-4 py-2.5 text-white text-sm mb-6 focus:outline-none focus:border-accent"
+      />
 
       {/* Create form */}
       {showForm && (
@@ -158,16 +162,7 @@ export default function GroupsPage() {
             />
           </div>
 
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => setIsPublic(v => !v)}
-              className={`relative w-9 h-5 shrink-0 rounded-full transition-colors ${isPublic ? 'bg-accent' : 'bg-surface-high border border-white/20'}`}
-            >
-              <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${isPublic ? 'translate-x-4' : 'translate-x-0.5'}`} />
-            </button>
-            <span className="text-sm text-muted">{isPublic ? 'Public' : 'Private'}</span>
-          </div>
+          <Toggle checked={isPublic} onChange={setIsPublic} label={isPublic ? 'Public' : 'Private'} />
 
           {createError && <p className="text-sm text-past">{createError}</p>}
 
@@ -193,46 +188,12 @@ export default function GroupsPage() {
             Create the first one
           </button>
         </div>
+      ) : filtered.length === 0 ? (
+        <p className="text-muted text-sm">No groups match “{query}”.</p>
       ) : (
         <div className="flex flex-col gap-3">
-          {groups.map(g => (
-            <div key={g.id} className="card flex items-start justify-between gap-4">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className="text-sm font-semibold text-white capitalize truncate">{g.name}</h3>
-                  {g.season && (
-                    <span
-                      className="text-xs px-2 py-0.5 rounded-full shrink-0"
-                      style={{
-                        backgroundColor: (SEASON_COLOR[g.season] ?? '#9aa3b8') + '22',
-                        color: SEASON_COLOR[g.season] ?? '#9aa3b8',
-                      }}
-                    >
-                      {g.season}
-                    </span>
-                  )}
-                  {!g.is_public && (
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-white/[0.06] text-faint shrink-0">private</span>
-                  )}
-                </div>
-                {g.description && (
-                  <p className="text-xs text-muted line-clamp-1 mb-2">{g.description}</p>
-                )}
-                <div className="flex items-center gap-4 text-xs text-faint">
-                  <span>{g.member_count} member{g.member_count !== 1 ? 's' : ''}</span>
-                  {g.champion
-                    ? <span className="text-accent">Champion: {g.champion}</span>
-                    : <span className="text-past">No champion assigned</span>
-                  }
-                </div>
-              </div>
-              <button
-                onClick={() => handleDelete(g.id, g.name)}
-                className="shrink-0 text-xs text-faint hover:text-past transition-colors px-2 py-1"
-              >
-                Delete
-              </button>
-            </div>
+          {filtered.map(g => (
+            <GroupCard key={g.id} group={g} users={users} onChanged={load} />
           ))}
         </div>
       )}
