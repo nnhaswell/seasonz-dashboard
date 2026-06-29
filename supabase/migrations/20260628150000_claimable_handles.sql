@@ -14,6 +14,28 @@ on conflict do nothing;
 alter table public.profiles
   add column if not exists handle_changed_at timestamptz;
 
+-- Force ALL handle changes through claim_handle(). A table-level UPDATE grant
+-- on profiles means column REVOKE can't help, so guard with a BEFORE UPDATE
+-- trigger: handle/handle_changed_at may only change when the per-transaction
+-- flag set inside claim_handle() is present. Direct client updates are blocked;
+-- other columns (display_name, bio, …) and INSERTs (the signup trigger) are
+-- unaffected.
+create or replace function public.profiles_guard_handle()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  if (new.handle is distinct from old.handle
+      or new.handle_changed_at is distinct from old.handle_changed_at)
+     and current_setting('app.allow_handle_change', true) is distinct from '1' then
+    raise exception 'handle can only be changed via claim_handle()';
+  end if;
+  return new;
+end; $$;
+
+drop trigger if exists trg_profiles_guard_handle on public.profiles;
+create trigger trg_profiles_guard_handle
+  before update on public.profiles
+  for each row execute function public.profiles_guard_handle();
+
 -- Live availability check (no side effects). Returns { available, reason }.
 create or replace function public.check_handle(p_handle text)
 returns jsonb language plpgsql security definer set search_path = public as $$
@@ -61,6 +83,7 @@ begin
   if v_last is not null and v_last > now() - v_cooldown then
     return jsonb_build_object('ok', false, 'reason', 'cooldown', 'next_at', v_last + v_cooldown);
   end if;
+  perform set_config('app.allow_handle_change', '1', true);  -- transaction-local; lets the guard trigger through
   update profiles set handle = h, handle_changed_at = now() where id = v_user;
   return jsonb_build_object('ok', true, 'handle', h);
 end; $$;
