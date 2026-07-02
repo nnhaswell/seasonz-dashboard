@@ -51,9 +51,9 @@ A camera scanner (`expo-camera`, barcode mode) with:
 - Debounce so one code fires once.
 
 ### 5. Entry point + wiring
-- A single **"QR code" entry in the profile panel** opens a modal with two modes: **My code** / **Scan** (a segmented toggle).
+- A single **"Let's connect" entry in the profile panel** (connect-themed label) opens a modal with two modes: **My code** / **Scan** (a segmented toggle). The modal is titled "Let's connect".
 - The modal is mounted in `App.tsx` (like the other sheets) with an `onOpenProfile` callback wired to `goToProfile('other', id)` so a scan can navigate.
-- (Optional secondary entry: a scan icon on the Connections screen — deferred to keep v1 focused.)
+- **One entry point only** for v1 — no Connections-screen scan shortcut (kept focused).
 
 ## Error handling / edge cases
 
@@ -85,7 +85,7 @@ A camera scanner (`expo-camera`, barcode mode) with:
 - `src/components/QrConnectSheet.tsx` — the modal shell with My code / Scan toggle.
 - `src/App.tsx` — profile-panel "QR code" row + mount `QrConnectSheet` with `onOpenProfile`.
 
-## Open items to confirm at plan time
+## Decisions (locked)
 
-- Exact placement/label of the profile-panel entry ("QR code" vs "Find friends").
-- Whether to also add the Connections scan shortcut in v1 (proposed: no).
+- Profile-panel entry + modal title: **"Let's connect"** (connect-themed).
+- **One entry point** (profile panel) for v1 — no Connections scan shortcut.
