@@ -386,7 +386,7 @@ export default function SummariesPage() {
                 <label className="block text-xs text-muted mb-1.5">Title *</label>
                 <input required value={title} onChange={e => setTitle(e.target.value)} placeholder="The Richest Man in Babylon" className={inputCls} />
               </div>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
                 <div>
                   <label className="block text-xs text-muted mb-1.5">Author</label>
                   <input value={author} onChange={e => setAuthor(e.target.value)} placeholder="George S. Clason" className={inputCls} />

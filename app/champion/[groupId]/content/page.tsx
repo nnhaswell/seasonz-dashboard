@@ -92,7 +92,7 @@ export default async function ContentPage({ params }: Props) {
       </div>
 
       {/* Stats Summary */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
         <div className="card">
           <p className="stat-label">Total Posts</p>
           <p className="stat-number mt-2">{posts?.length ?? 0}</p>

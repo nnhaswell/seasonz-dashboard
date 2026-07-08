@@ -119,7 +119,7 @@ export default async function SuperuserChampionsPage() {
       </div>
 
       {/* Summary Stats */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
         <div className="card">
           <p className="stat-label">Total Champions</p>
           <p className="stat-number mt-2">{championStats.length}</p>
@@ -179,7 +179,7 @@ export default async function SuperuserChampionsPage() {
             </div>
 
             {/* Stats Row */}
-            <div className="grid grid-cols-4 gap-4 mb-4 p-3 bg-surface-high rounded-lg">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-4 p-3 bg-surface-high rounded-lg">
               <div>
                 <p className="text-xs text-faint mb-1">Groups</p>
                 <p className="text-lg font-bold text-white">

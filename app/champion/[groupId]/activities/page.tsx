@@ -129,7 +129,7 @@ export default function ChampionActivitiesPage() {
             <label className="block text-xs text-muted mb-1.5">Description *</label>
             <textarea rows={2} value={description} onChange={e => setDescription(e.target.value)} placeholder="A quick note on where you're at." className={`${inputCls} resize-none`} />
           </div>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
             <div>
               <label className="block text-xs text-muted mb-1.5">Button</label>
               <select value={cta} onChange={e => setCta(e.target.value)} className={inputCls}>

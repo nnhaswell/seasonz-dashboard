@@ -98,7 +98,7 @@ export default async function SuperuserUsersPage() {
       </div>
 
       {/* Summary Stats */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
         <div className="card">
           <p className="stat-label">Total Users</p>
           <p className="stat-number mt-2">{userStats.length}</p>

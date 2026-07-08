@@ -55,7 +55,7 @@ export default async function SuperuserOverviewPage() {
       </div>
 
       {/* ── Top stats ── */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
         {[
           { label: 'Total users',       value: total },
           { label: 'Active this week',  value: activeThisWeek ?? 0 },
@@ -69,7 +69,7 @@ export default async function SuperuserOverviewPage() {
         ))}
       </div>
 
-      <div className="grid grid-cols-2 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 mb-6">
         <div className="card">
           <p className="stat-label">Total posts</p>
           <p className="stat-number mt-2">{postsRes.count ?? 0}</p>
@@ -108,7 +108,7 @@ export default async function SuperuserOverviewPage() {
       </div>
 
       {/* ── Quick links ── */}
-      <div className="grid grid-cols-3 gap-3 mt-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6">
         {[
           { label: 'Manage users',    href: '/superuser/users' },
           { label: 'Manage groups',   href: '/superuser/groups' },

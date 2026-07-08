@@ -106,7 +106,7 @@ export default async function SuperuserAnalyticsPage() {
       {/* Growth Metrics */}
       <div className="mb-6">
         <h2 className="text-sm font-semibold text-white mb-3">Growth Overview</h2>
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
           <div className="card">
             <p className="stat-label">New Users (30d)</p>
             <p className="stat-number mt-2">{newUsers30d}</p>
@@ -131,7 +131,7 @@ export default async function SuperuserAnalyticsPage() {
       {/* Engagement Metrics */}
       <div className="mb-6">
         <h2 className="text-sm font-semibold text-white mb-3">Engagement Metrics</h2>
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
           <div className="card">
             <p className="stat-label">Active Users (30d)</p>
             <p className="stat-number mt-2">{activeUsers}</p>
@@ -231,7 +231,7 @@ export default async function SuperuserAnalyticsPage() {
       {/* Champion Impact */}
       <div className="card">
         <h2 className="text-sm font-semibold text-white mb-4">Champion Impact</h2>
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
           <div>
             <p className="text-xs text-faint mb-1">Messages Sent</p>
             <p className="text-2xl font-bold text-white">{totalMessages}</p>

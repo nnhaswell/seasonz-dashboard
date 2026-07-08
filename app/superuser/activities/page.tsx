@@ -122,7 +122,7 @@ export default function SuperuserActivitiesPage() {
             <label className="block text-xs text-muted mb-1.5">Description *</label>
             <textarea rows={2} value={description} onChange={e => setDescription(e.target.value)} placeholder="Five minutes to name where you are right now." className={`${inputCls} resize-none`} />
           </div>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
             <div>
               <label className="block text-xs text-muted mb-1.5">Button</label>
               <select value={cta} onChange={e => setCta(e.target.value)} className={inputCls}>
