@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { PromoteChampionButton } from './promote-champion-button'
+import { UserAvatar } from '@/components/UserAvatar'
 
 export default async function SuperuserUsersPage() {
   const supabase = await createClient()
@@ -166,11 +167,7 @@ export default async function SuperuserUsersPage() {
                 {/* User Info */}
                 <td className="px-4 py-4">
                   <div className="flex items-center gap-3">
-                    <img
-                      src={user.avatar_url ?? 'https://i.pravatar.cc/150?img=0'}
-                      alt={user.display_name}
-                      className="w-10 h-10 rounded-full"
-                    />
+                    <UserAvatar avatarUrl={user.avatar_url} name={user.display_name} size={40} />
                     <div>
                       <p className="text-sm font-semibold text-white">
                         {user.display_name}

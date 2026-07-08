@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { UserAvatar } from '@/components/UserAvatar'
 
 type RequestRow = {
   id: string
@@ -36,12 +37,7 @@ export function JoinRequestsPanel({ groupId, requests }: { groupId: string; requ
       <div className="flex flex-col gap-2">
         {requests.map(r => (
           <div key={r.id} className="flex items-center gap-3">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={r.profile?.avatar_url ?? `https://i.pravatar.cc/100?u=${r.user_id}`}
-              alt=""
-              className="w-9 h-9 rounded-full"
-            />
+            <UserAvatar avatarUrl={r.profile?.avatar_url} name={r.profile?.display_name} size={36} />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-white truncate">{r.profile?.display_name ?? 'Someone'}</p>
               <p className="text-xs text-muted">@{r.profile?.handle ?? ''}</p>

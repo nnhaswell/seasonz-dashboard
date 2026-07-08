@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { UserAvatar } from '@/components/UserAvatar'
 
 interface Props {
   params: Promise<{ groupId: string }>
@@ -137,11 +138,7 @@ export default async function ContentPage({ params }: Props) {
             <div key={post.id} className="card hover:border-white/20 transition-colors">
               {/* Post Header */}
               <div className="flex items-start gap-3 mb-3">
-                <img
-                  src={profile.avatar_url ?? 'https://i.pravatar.cc/150?img=0'}
-                  alt={profile.display_name}
-                  className="w-10 h-10 rounded-full"
-                />
+                <UserAvatar avatarUrl={profile.avatar_url} name={profile.display_name} size={40} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-semibold text-white">

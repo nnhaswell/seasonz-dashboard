@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { UserAvatar } from '@/components/UserAvatar'
 
 export default async function SuperuserChampionsPage() {
   const supabase = await createClient()
@@ -155,11 +156,7 @@ export default async function SuperuserChampionsPage() {
           >
             {/* Champion Header */}
             <div className="flex items-start gap-4 mb-4">
-              <img
-                src={champion.avatar_url ?? 'https://i.pravatar.cc/150?img=0'}
-                alt={champion.display_name}
-                className="w-14 h-14 rounded-full"
-              />
+              <UserAvatar avatarUrl={champion.avatar_url} name={champion.display_name} size={56} />
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-4">
                   <div>
