@@ -61,7 +61,7 @@ export default async function ChampionLayout({ children, params }: Props) {
         allGroups={groupList}
         isSuperuser={!!profile?.is_superuser}
       />
-      <main className="flex-1 min-w-0 p-4 pt-18 md:pt-8 md:p-8">
+      <main className="flex-1 min-w-0 p-4 pt-16 md:pt-8 md:p-8">
         {children}
       </main>
     </div>
