@@ -19,7 +19,7 @@ export default async function SuperuserLayout({ children }: { children: React.Re
     <div className="flex min-h-screen bg-bg">
       <SuperuserSidebar />
       {/* pt-14 on mobile gives space below the fixed top bar; md:pt-0 removes it on desktop */}
-      <main className="flex-1 min-w-0 p-4 pt-16 md:pt-8 md:p-8">
+      <main className="flex-1 min-w-0 px-4 pb-4 pt-16 md:px-8 md:pb-8 md:pt-8">
         {children}
       </main>
     </div>
